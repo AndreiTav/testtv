@@ -1,11 +1,23 @@
 param(
     [string]$Adb = 'adb',
     [string]$Tv = '192.168.68.50:5555',
-    [string]$Apk = (Join-Path $PSScriptRoot '..\SalaTV-debug.apk'),
+    [string]$Apk = '',
     [string]$Records = (Join-Path $PSScriptRoot '..\tv-records')
 )
 . (Join-Path $PSScriptRoot 'Common.ps1')
-if (-not (Test-Path $Apk)) { throw "APK nao encontrado: $Apk" }
+if ([string]::IsNullOrWhiteSpace($Apk)) {
+    $candidates = @(
+        (Join-Path $PSScriptRoot '..\SalaTV-debug.apk'),
+        (Join-Path $PSScriptRoot '..\dist\SalaTV-debug.apk'),
+        (Join-Path $PSScriptRoot '..\app\build\outputs\apk\debug\app-debug.apk')
+    )
+    $Apk = $candidates | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+    if (-not $Apk) {
+        throw 'APK nao encontrado. Extraia SalaTV-package.zip inteiro ou passe -Apk com o caminho do SalaTV-debug.apk.'
+    }
+}
+if (-not (Test-Path -LiteralPath $Apk -PathType Leaf)) { throw "APK nao encontrado: $Apk" }
+$Apk = (Resolve-Path -LiteralPath $Apk).ProviderPath
 Connect-Tv
 Save-TvBaseline
 $homeBeforeInstall = Get-TvHome

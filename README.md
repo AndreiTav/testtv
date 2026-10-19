@@ -16,6 +16,12 @@ Na pasta extraída:
 
 O script conecta em `192.168.68.50:5555`, salva o estado anterior, transfere o APK, compara SHA256, instala por `pm install -r -t`, abre a Activity explicitamente e salva a captura em `tv-records\test-...\01-initial.png`. **Não desativa o launcher do Google e mantém a HOME anterior.** Uma autorização ADB ou confirmação de instalação pode aparecer na TV. Se a instalação for recusada por verificação ou assinatura de HOME, pare e guarde a saída; não contorne a verificação nem repita com outros instaladores.
 
+O instalador procura o APK na raiz do pacote, em `dist` (quando você baixa o repositório inteiro) e na saída de um build local. Se você baixou somente os scripts, baixe também `dist/SalaTV-debug.apk` do GitHub e indique seu caminho:
+
+```powershell
+& .\scripts\Install-Test.ps1 -Adb $adb -Apk "C:\caminho\SalaTV-debug.apk"
+```
+
 Se o Windows bloquear scripts baixados, após conferir os arquivos use estes comandos para liberar somente os scripts deste pacote e executar com política RemoteSigned apenas nesse processo:
 
 ```powershell

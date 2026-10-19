@@ -14,3 +14,7 @@ Instalação do novo pacote HOME, layout e animações, navegação pelo control
 A reinstalação dos quatro APKs originais do Jellyfin foi aceita no Windows do usuário e sua tela de abertura foi capturada. Os pacotes com.tcl.bi e com.tcl.logkit foram confirmados desativados. Os demais apps da limpeza ainda estão pendentes; Netflix continua no estado desativado do backup até uma etapa explícita de reativação.
 
 A distribuição contém uma chave de assinatura de desenvolvimento para recompilar atualizações compatíveis. Não use essa chave para produção. Não contém backups pessoais da TV, credenciais ADB ou capturas do usuário.
+
+## Correção de localização do APK
+
+O instalador agora detecta automaticamente o APK na distribuição binária, na pasta dist do repositório e na saída do build. Quatro verificações com ADB simulado passaram: os três layouts e a interrupção antes de qualquer chamada ADB quando o APK está ausente. Nenhuma nova alteração no aplicativo Android.
