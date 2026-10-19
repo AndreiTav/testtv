@@ -65,7 +65,17 @@ Esse comando registra os candidatos HOME, define Sala TV, confere o resolver, pr
 
 Com `-DisableStockLauncher`, o script confere os candidatos HOME, o estado do Sala TV e sua abertura antes de desativar somente LauncherX. Registra o estado anterior, tenta atribuir a HOME e verifica novamente após a tecla Home. Se outra HOME assumir ou a operação falhar, restaura o estado anterior de LauncherX e a HOME anterior, preservando os demais apps (inclusive a Netflix reativada). Os diagnósticos ficam na pasta `tv-records\home-...`.
 
-**Não desativa o pacote de configurações nem o assistente de configuração automaticamente.** Nesta TV, os candidatos originais eram LauncherX, `setupwraith.RecoveryActivity` (com Activity desabilitada no relatório) e FallbackHome das configurações. Um crash posterior do aplicativo exige usar a restauração pelo ADB. O teste final deve incluir a tecla Home do controle físico e as entradas HDMI, além da tecla injetada pelo ADB.
+**Não desativa o pacote de configurações nem o assistente de configuração automaticamente.** Nesta TV, os candidatos originais eram LauncherX, `setupwraith.RecoveryActivity` e FallbackHome das configurações. O estado efetivo da Activity é verificado separadamente por usuário. Um crash posterior do aplicativo exige usar a restauração pelo ADB. O teste final deve incluir a tecla Home do controle físico e as entradas HDMI, além da tecla injetada pelo ADB.
+
+Na execução real desta TCL, `setupwraith/.RecoveryActivity` assumiu HOME após desativar LauncherX, apesar de `set-home-activity` responder Success. A opção específica abaixo trata esse caso:
+
+```powershell
+& .\scripts\Set-Home.ps1 -Adb $adb -DisableStockLauncher -DisableSetupRecovery
+```
+
+Ela exige que `device_provisioned` e `user_setup_complete` já sejam 1; não altera esses ajustes. Inspeciona `dumpsys package` e registra separadamente o override da **Activity RecoveryActivity** do usuário 0 antes de desativá-la. O restante do pacote `setupwraith` continua habilitado. Depois desativa LauncherX e verifica a nova HOME. Uma falha tenta restaurar o estado de ambos e a HOME anterior, mantendo a Netflix no seu estado atual.
+
+Use a versão atualizada de `Restore-TV.ps1` com a versão correspondente de `Common.ps1` para devolver também o override exato da Activity. `original-state.json` recebe a propriedade adicional `ComponentStates`, preservando seus dados anteriores; a versão anterior do JSON é copiada para a pasta de diagnóstico da tentativa. Backups antigos sem essa propriedade continuam suportados. Se executar os scripts de outra pasta, passe `-Records "C:\caminho\SalaTV\tv-records"` tanto na ativação quanto na restauração para usar o mesmo histórico.
 
 ## Restauração e apps
 

@@ -22,3 +22,11 @@ O instalador agora detecta automaticamente o APK na distribuição binária, na 
 ## Correção da ativação de HOME
 
 Quatro cenários com ADB simulado passaram: rejeição de Success quando o resolver não muda; atribuição após desativar LauncherX; restauração de LauncherX/HOME se o assistente assumir, preservando Netflix habilitada; e interrupção antes de tocar no launcher antigo caso Sala TV esteja desativado. A regressão de instalação, restauração e recusa de APK também passou. Não são testes executados na TCL: o resultado da nova sequência depende da próxima verificação no aparelho.
+
+## Tratamento específico de RecoveryActivity
+
+Na execução real, ao desativar LauncherX o resolver retornou com.google.android.tungsten.setupwraith/.RecoveryActivity. O script anterior confirmou a restauração de LauncherX; a nova opção DisableSetupRecovery ainda não foi executada na TCL.
+
+Sete verificações com ADB simulado passaram: parser dos estados de componente 0/1/2 e isolamento do usuário; ativação/restauração completa para cada um dos três estados originais; rollback de HOME e Activity sem reverter Netflix; bloqueio com configuração inicial incompleta; e falha ao desativar o componente sem deixar LauncherX desativado. A regressão anterior de instalação/restauração e os quatro cenários anteriores de HOME também passaram.
+
+A sequência desativa apenas a Activity RecoveryActivity e LauncherX, com o estado do componente salvo aditivamente em original-state.json. A interface e o binário Android permanecem os mesmos. Falta testar o novo fluxo na TV real, inclusive Home físico e HDMI.

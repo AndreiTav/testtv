@@ -24,6 +24,65 @@ function Get-TvPackageState {
     return [int]$match.Groups[1].Value
 }
 
+function Get-TvComponentState {
+    param([string]$Component, [string]$Dump = '')
+    if ($Component -notmatch '^[A-Za-z0-9_.]+/[A-Za-z0-9_.$]+$') { throw 'Componente invalido.' }
+    $parts = $Component.Split('/')
+    $class = if ($parts[1].StartsWith('.')) { $parts[0] + $parts[1] } else { $parts[1] }
+    $names = @($class, $parts[1], ($parts[0] + '/' + $class), $Component)
+    if ([string]::IsNullOrWhiteSpace($Dump)) {
+        $Dump = Invoke-TvAdb -Arguments @('shell', 'dumpsys', 'package', $parts[0])
+    }
+    # Android stores component overrides separately from the application's enabled state.
+    # Read only the first, installed User 0 block of the requested package.
+    $found = $false
+    $userIndent = -1
+    $section = 0
+    $sectionIndent = -1
+    $result = 0
+    foreach ($line in ($Dump -split '\r?\n')) {
+        if (-not $found) {
+            if ($line -match '^(\s*)User 0:.*\binstalled=true\b') {
+                $found = $true
+                $userIndent = $Matches[1].Length
+            }
+            continue
+        }
+        if ([string]::IsNullOrWhiteSpace($line)) { continue }
+        $indent = [regex]::Match($line, '^\s*').Length
+        if ($line -match '^\s*User \d+:' -or $indent -le $userIndent) { break }
+        if ($line -match '^\s*(enabledComponents|disabledComponents):') {
+            if ($line -notmatch '^\s*(enabledComponents|disabledComponents):\s*$') {
+                throw 'Formato de componentes inesperado; nao vou alterar a Activity.'
+            }
+            $section = if ($Matches[1] -eq 'enabledComponents') { 1 } else { 2 }
+            $sectionIndent = $indent
+            continue
+        }
+        if ($section -eq 0) { continue }
+        if ($indent -le $sectionIndent) { $section = 0; continue }
+        $entry = $line.Trim()
+        if ($entry -notmatch '^[A-Za-z0-9_.$]+(/[A-Za-z0-9_.$]+)?$') {
+            throw 'Lista de componentes inesperada; estado anterior nao confirmado.'
+        }
+        if ($entry -in $names) {
+            if ($result -ne 0 -and $result -ne $section) { throw 'Estado de componente ambiguo.' }
+            $result = $section
+        }
+    }
+    if (-not $found) { throw 'Estado instalado do usuario 0 nao encontrado para o componente.' }
+    return $result
+}
+
+function Set-TvComponentState {
+    param([string]$Component, [int]$State)
+    if ($Component -notmatch '^[A-Za-z0-9_.]+/[A-Za-z0-9_.$]+$') { throw 'Componente invalido.' }
+    if ($State -notin @(0,1,2)) { throw 'Estado de Activity invalido.' }
+    $verbs = @('default-state', 'enable', 'disable')
+    Invoke-TvAdb -Arguments @('shell', 'pm', $verbs[$State], '--user', '0', $Component) | Write-Host
+    if ((Get-TvComponentState $Component) -ne $State) { throw "Estado da Activity nao confirmado: $Component" }
+}
+
 function Set-TvPackageState {
     param([string]$Package, [int]$State)
     $verbs = @('default-state', 'enable', 'disable', 'disable-user', 'disable-until-used')

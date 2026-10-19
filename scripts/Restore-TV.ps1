@@ -12,6 +12,11 @@ Connect-Tv
 # Restore the old launcher before switching away from Sala TV.
 Set-TvPackageState 'com.google.android.apps.tv.launcherx' ([int]$state.PackageStates.'com.google.android.apps.tv.launcherx')
 Set-TvPackageState 'com.google.android.tungsten.setupwraith' ([int]$state.PackageStates.'com.google.android.tungsten.setupwraith')
+if ($state.PSObject.Properties['ComponentStates']) {
+    foreach ($property in $state.ComponentStates.PSObject.Properties) {
+        Set-TvComponentState $property.Name ([int]$property.Value)
+    }
+}
 Set-TvHome $state.OriginalHome
 foreach ($property in $state.PackageStates.PSObject.Properties) {
     if ($property.Name -notin @('com.google.android.apps.tv.launcherx', 'com.google.android.tungsten.setupwraith')) {
