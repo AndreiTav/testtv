@@ -57,13 +57,15 @@ A reinstalação do Jellyfin já foi aceita e sua tela de abertura foi capturada
 & .\scripts\Set-Home.ps1 -Adb $adb
 ```
 
-Esse comando registra os candidatos HOME, define Sala TV, confere o resolver, pressiona Home e captura o resultado. O launcher do Google ainda fica habilitado. Depois de inspecionar essa captura e testar os apps/HDMI, a etapa separada abaixo desativa o launcher antigo:
+Esse comando registra os candidatos HOME, define Sala TV, confere o resolver, pressiona Home e captura o resultado. O launcher do Google ainda fica habilitado. Alguns firmwares respondem `Success`, mas continuam resolvendo HOME para o Google TV; isso foi observado nesta TCL. Depois de verificar a interface do Sala TV no aparelho, a etapa separada abaixo desativa o launcher antigo antes de tentar definir a nova HOME:
 
 ```powershell
 & .\scripts\Set-Home.ps1 -Adb $adb -DisableStockLauncher
 ```
 
-O script verifica se outro candidato HOME assumiu o controle e restaura o launcher anterior se detectar isso. **Não desativa o pacote de configurações nem o assistente de configuração automaticamente.** Nesta TV, os candidatos originais eram LauncherX, `setupwraith.RecoveryActivity` (com Activity desabilitada no relatório) e FallbackHome das configurações. Um crash posterior do aplicativo exige usar a restauração pelo ADB.
+Com `-DisableStockLauncher`, o script confere os candidatos HOME, o estado do Sala TV e sua abertura antes de desativar somente LauncherX. Registra o estado anterior, tenta atribuir a HOME e verifica novamente após a tecla Home. Se outra HOME assumir ou a operação falhar, restaura o estado anterior de LauncherX e a HOME anterior, preservando os demais apps (inclusive a Netflix reativada). Os diagnósticos ficam na pasta `tv-records\home-...`.
+
+**Não desativa o pacote de configurações nem o assistente de configuração automaticamente.** Nesta TV, os candidatos originais eram LauncherX, `setupwraith.RecoveryActivity` (com Activity desabilitada no relatório) e FallbackHome das configurações. Um crash posterior do aplicativo exige usar a restauração pelo ADB. O teste final deve incluir a tecla Home do controle físico e as entradas HDMI, além da tecla injetada pelo ADB.
 
 ## Restauração e apps
 

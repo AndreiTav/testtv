@@ -1,2 +1,2 @@
 0e45a608aa6fca9ee700b2a6863b7d3e1e3022d9c4e233d5dcb722cd9742d697  SalaTV-debug.apk
-605aa9e137615a81d465b99e92294f8cea40a0bf311c2acf9dd15f073f2f6c1d  SalaTV-package.zip
+861cc3972c314097756cbb45680bddfab4799db6caa4d774040a1501fe7f47cd  SalaTV-package.zip

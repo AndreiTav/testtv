@@ -7,14 +7,18 @@
 - Scripts PowerShell: sintaxe verificada em PowerShell 7.4.13/Linux; fluxo exercitado com ADB simulado. Passaram isolamento da instalação, escolha de HOME, restauração dos estados originais, interrupção em recusa de verificação e rollback se outro candidato HOME assumir após desativar LauncherX. Isso não é uma execução no Windows nem na TV real.
 - Setup de compilação reexecutado com sucesso no ambiente atual: JDK 17.0.20.1, Gradle 8.11.1, SDK 35, Build Tools 35.0.0. Checksums dos downloads oficiais e TLS mantidos.
 
-## Ainda exige a TV real
+## Evidência atual da TV real e verificações pendentes
 
-Instalação do novo pacote HOME, layout e animações, navegação pelo controle, abertura/reprodução dos apps, nome do Wi-Fi, personalização, troca HDMI, HOME padrão, consumo de RAM e ganho de desempenho não foram verificados neste APK. O primeiro script só instala e abre para esse teste. Não desative o launcher antigo antes da revisão das capturas.
+O usuário instalou Sala TV e forneceu capturas do dock e da grade de quatro colunas. Netflix foi reativada, sua abertura foi confirmada e o banner apareceu no dock. A tecla Baixo revelou a grade. Isso confirma essas etapas de interface; não constitui medição de RAM, desempenho, reprodução dos quatro apps nem verificação completa de navegação, Wi-Fi, personalização ou HDMI.
 
-A reinstalação dos quatro APKs originais do Jellyfin foi aceita no Windows do usuário e sua tela de abertura foi capturada. Os pacotes com.tcl.bi e com.tcl.logkit foram confirmados desativados. Os demais apps da limpeza ainda estão pendentes; Netflix continua no estado desativado do backup até uma etapa explícita de reativação.
+A atribuição simples de HOME respondeu Success, mas o resolver permaneceu no LauncherX. A correção de ativação com desativação prévia de LauncherX ainda exige execução no aparelho e teste da tecla Home física. O assistente de configuração, os serviços de TV/HDMI e os demais componentes essenciais permanecem preservados. BI e Logkit foram confirmados desativados; os demais apps da limpeza ainda estão pendentes.
 
 A distribuição contém uma chave de assinatura de desenvolvimento para recompilar atualizações compatíveis. Não use essa chave para produção. Não contém backups pessoais da TV, credenciais ADB ou capturas do usuário.
 
 ## Correção de localização do APK
 
 O instalador agora detecta automaticamente o APK na distribuição binária, na pasta dist do repositório e na saída do build. Quatro verificações com ADB simulado passaram: os três layouts e a interrupção antes de qualquer chamada ADB quando o APK está ausente. Nenhuma nova alteração no aplicativo Android.
+
+## Correção da ativação de HOME
+
+Quatro cenários com ADB simulado passaram: rejeição de Success quando o resolver não muda; atribuição após desativar LauncherX; restauração de LauncherX/HOME se o assistente assumir, preservando Netflix habilitada; e interrupção antes de tocar no launcher antigo caso Sala TV esteja desativado. A regressão de instalação, restauração e recusa de APK também passou. Não são testes executados na TCL: o resultado da nova sequência depende da próxima verificação no aparelho.
